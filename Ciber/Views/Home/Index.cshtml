@@ -1,0 +1,107 @@
+﻿@model IQueryable<Ciber.Models.OrdersDisplay>;
+@{
+    ViewData["Title"] = "Home Page";
+}
+<style>
+    a.disabled {
+        pointer-events: none;
+    }
+</style>
+@*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>*@
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+<div>
+    <form asp-action="Index" method="get" style="padding-top:10px;">
+        <div class="form-actions no-color">
+            <p>
+                Enter category to search <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
+                <input type="submit" value="Search" class="btn btn-default" />
+            </p>
+        </div>
+    </form>
+    <table class="table">
+        <tr>
+            <th>Product Name</th>
+            <th>Category Name</th>
+            <th>Customer Name</th>
+            <th>Order Date</th>
+            <th>Amount</th>
+        </tr>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.CategoryName</td>
+                <td>@product.CustomerName</td>
+                <td>@product.OrderDate.ToString("dd-MMMM-yyyy")</td>
+                <td>@product.Amount</td>
+            </tr>
+        }
+    </table>
+    <ul class="pagination">
+        @{
+            int numberPage = ViewBag.numberPage;
+            int currentPage = ViewBag.currentPage;
+            int offset = 2;
+
+            var prevDisabled = currentPage > 1 ? "" : "disabled";
+            var nextDisabled = currentPage < numberPage ? "" : "disabled";
+
+            int prevPage = currentPage - 1;
+            <li><a class="@prevDisabled" asp-controller="Home" asp-action="Index" asp-route-page="@prevPage" 
+                                                                asp-route-searchString="@ViewData["CurrentFilter"]">Prev</a></li>
+
+            int from = currentPage - offset;
+            int to = currentPage + offset;
+            if (from <= 0)
+            {
+                from = 1;
+                to = offset * 2;
+            }
+
+            if (to > numberPage)
+            {
+                to = numberPage;
+            }
+
+            int i;
+            for (i = from; i <= to; i++)
+            {
+                    <li class="@(currentPage == i ? "active" : "") "><a asp-controller="Home" asp-action="Index" asp-route-page="@i" 
+                                                                            asp-route-searchString="@ViewData["CurrentFilter"]">@i</a></li>
+            }
+
+            int nextPage = currentPage + 1;
+            <li><a class="@nextDisabled" asp-controller="Home" asp-action="Index" asp-route-page="@nextPage"
+                                                                            asp-route-searchString="@ViewData["CurrentFilter"]">Next</a></li>
+        }
+    </ul>
+    <div class="row">
+        <a id="createOrder" class="pull-right">Create new order</a>
+    </div>
+
+    <div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+
+    </div>
+    
+    <script>
+        $(document).ready(function () {
+
+            $('#createOrder').click(function () {
+                $.ajax({
+                    url: '@Url.Action("_CreateOrderModal", "Home")',
+                    type: 'post',
+                    data: { },
+                    success: function (response) {
+                        $('.modal').html(response);
+                        $('.modal').modal('show');
+                    }
+                });
+            });
+           
+        });
+    </script>
+</div>

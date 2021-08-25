@@ -1,0 +1,99 @@
+﻿@*@model Ciber.Models.CreateOrderModel
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create new order</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <select class="form-select" asp-for="ProductId"
+                        asp-items="@(new SelectList(Model.listProduct, "Value", "Text"))"></select></div>
+
+        </div>
+    </div>*@
+@model Ciber.Models.CreateOrderModel
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="myModalLabel">Create new order</h4>
+        </div>
+        <div class="modal-body">
+            <form id="orderForm">
+                <div class="text-danger" id="validateMgs"></div>
+                <div class="row" style="padding: 5px;">
+                    <div class="col-sm-4">Order Name</div>
+                    <div class="col-sm-6">
+                        <input asp-for="OrderName" type="text" id="OrderName"
+                               name="OrderName" value="" />
+                    </div>
+                </div>
+                <div class="row" style="padding: 5px;">
+                    <div class="col-sm-4">Product</div>
+                    <div class="col-sm-6">
+                        <select class="form-select dropdown" asp-for="ProductId"
+                                asp-items="@(new SelectList(Model.listProduct, "Value", "Text"))"></select>
+                    </div>
+                </div>
+                <div class="row" style="padding: 5px;">
+                    <div class="col-sm-4">Customer</div>
+                    <div class="col-sm-6">
+                        <select class="form-select dropdown" asp-for="Customer"
+                                asp-items="@(new SelectList(Model.listCustomer, "Value", "Text"))"></select>
+                    </div>
+                </div>
+                <div class="row" style="padding: 5px;">
+                    <div class="col-sm-4">Order Date</div>
+                    <div class="col-sm-6">
+                        <p><input type="text" id="datepicker" asp-for="OrderDate"></p>
+                    </div>
+                </div>
+                <div class="row" style="padding: 5px;">
+                    <div class="col-sm-4">Amount</div>
+                    <div class="col-sm-6">
+                        <input asp-for="Amount" type="text" id="Amount"
+                               name="Amount" value="" />
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary pull-right" id="submitOrder">Create order</button>
+        </div>
+        
+    </div>
+</div>
+<script>
+        $(document).ready(function () {
+
+            $('#submitOrder').click(function () {
+                $('#validateMgs').html('');
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("CreateOrder", "Home")',
+                    data: $("#orderForm").serialize(),
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.result == 1 || response.result == 3) {
+                            $('#validateMgs').html(response.errmsg);
+                        }
+                        else {
+                            $('.modal').modal('hide');
+                        }
+                    }
+                });
+            });
+
+            $(function () {
+                $("#datepicker").datepicker();
+            });
+
+            $(document).ajaxError(function (event, xhr, ajaxSettings, thrownError) {
+                if (xhr.status == 401) {
+                    window.location = "/Account/Login";
+                } 
+            });
+        });
+</script>
